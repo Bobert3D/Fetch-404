@@ -12,12 +12,44 @@ USER_FEEDBACK = []
 
 BACKUP_DEV_QUOTES = [
     {"en": "Any fool can write code that a computer can understand. Good programmers write code that humans can understand.", "author": "Martin Fowler"},
-    {"en": "First, solve the problem. Then, write the code.", "author": "John Johnson"}
+    {"en": "First, solve the problem. Then, write the code.", "author": "John Johnson"},
+    {"en": "To err is human, but to really foul things up you need a computer.", "author": "Paul R. Ehrlich"}
 ]
 
-# Validation Schemas
+# 🐕 Unblockable vector graphics of different dog designs written directly inside the code
+DOG_ILLUSTRATIONS = [
+    # Dog 1: Golden/Orange Retriever Look
+    """<svg viewBox="0 0 200 200" style="width:100%; max-height:280px; background:#f4f7f6; border-radius:8px;">
+      <circle cx="100" cy="100" r="80" fill="#f39c12" opacity="0.1"/>
+      <path d="M65,80 Q50,40 40,85 Q30,110 50,110 Z" fill="#d35400"/>
+      <path d="M135,80 Q150,40 160,85 Q170,110 150,110 Z" fill="#d35400"/>
+      <path d="M50,90 Q100,60 150,90 Q160,140 100,160 Q40,140 50,90 Z" fill="#e67e22"/>
+      <circle cx="85" cy="105" r="7" fill="#2c3e50"/><circle cx="115" cy="105" r="7" fill="#2c3e50"/>
+      <polygon points="90,122 110,122 100,135" fill="#2c3e50"/>
+    </svg>""",
+    # Dog 2: French Bulldog Style Look
+    """<svg viewBox="0 0 200 200" style="width:100%; max-height:280px; background:#edf2f7; border-radius:8px;">
+      <circle cx="100" cy="100" r="80" fill="#718096" opacity="0.1"/>
+      <path d="M55,50 Q40,30 50,70 Z" fill="#4a5568"/>
+      <path d="M145,50 Q160,30 150,70 Z" fill="#4a5568"/>
+      <circle cx="100" cy="115" r="55" fill="#a0aec0"/>
+      <ellipse cx="100" cy="125" rx="25" ry="18" fill="#2d3748"/>
+      <circle cx="80" cy="100" r="8" fill="#1a202c"/><circle cx="120" cy="100" r="8" fill="#1a202c"/>
+      <circle cx="100" cy="120" r="6" fill="#1a202c"/>
+    </svg>""",
+    # Dog 3: Cute White Terrier Style Look
+    """<svg viewBox="0 0 200 200" style="width:100%; max-height:280px; background:#fffaf0; border-radius:8px;">
+      <circle cx="100" cy="100" r="80" fill="#ed8936" opacity="0.1"/>
+      <path d="M60,60 L40,90 L75,85 Z" fill="#cbd5e0"/>
+      <path d="M140,60 L160,90 L125,85 Z" fill="#cbd5e0"/>
+      <circle cx="100" cy="110" r="50" fill="#f7fafc"/>
+      <circle cx="85" cy="105" r="6" fill="#2d3748"/><circle cx="115" cy="105" r="6" fill="#2d3748"/>
+      <ellipse cx="100" cy="118" rx="10" ry="7" fill="#4a5568"/>
+    </svg>"""
+]
+
 class DogGeneratorResponse(BaseModel):
-    image_url: str
+    image_element: str
     en: str
     author: str
     theme: str
@@ -40,8 +72,8 @@ def home_page():
     <body style="font-family:sans-serif; text-align:center; padding:50px; background:#f4f6f9;">
         <h1>🐕 Geeky Dog App Hub</h1>
         <p>Your multi-endpoint interactive engine is up and running!</p>
-        <a href="/view" style="padding:10px 20px; background:#3498db; color:white; text-decoration:none; border-radius:5px; margin:5px; display:inline-block;">Open Card Viewer</a>
-        <a href="/docs" style="padding:10px 20px; background:#95a5a6; color:white; text-decoration:none; border-radius:5px; margin:5px; display:inline-block;">View API Specs</a>
+        <a href="/view" style="padding:10px 20px; background:#3498db; color:white; text-decoration:none; border-radius:5px; margin:5px; display:inline-block; font-weight:bold;">Open Card Viewer</a>
+        <a href="/docs" style="padding:10px 20px; background:#95a5a6; color:white; text-decoration:none; border-radius:5px; margin:5px; display:inline-block; font-weight:bold;">View API Specs</a>
     </body>
     </html>
     """, status_code=200)
@@ -49,37 +81,28 @@ def home_page():
 # === 📤 ENDPOINT 2 (GET): Core Data Engine ===
 @app.get("/generate", response_model=DogGeneratorResponse, tags=["Core Services"])
 async def generate_dog_card():
-    # 🚀 FIX: Reliable fallback image URL that will never return a broken link
-    dog_image = "https://unsplash.com"
+    # Randomly select a built-in unblockable graphic illustration
+    active_visual = random.choice(DOG_ILLUSTRATIONS)
     selected_quote = random.choice(BACKUP_DEV_QUOTES)
-    theme_source = "Coding Wisdom (Backup Local DB)"
+    theme_source = "Coding Wisdom (Local Asset)"
 
     async with httpx.AsyncClient() as client:
-        # Step A: Fetch random dog image URL from Dog CEO API
         try:
-            dog_req = await client.get("https://dog.ceo", timeout=5.0)
-            if dog_req.status_code == 200:
-                dog_image = dog_req.json().get("message", dog_image)
-        except Exception as e: 
-            print(f"--- IMAGE API ERROR: {e} ---") # Logs connection errors to your console
-
-        # Step B: Fetch random coding statement from Programming Quotes API
-        try:
-            quote_req = await client.get("https://vercel.app", timeout=5.0)
+            quote_req = await client.get("https://vercel.app", timeout=3.0)
             if quote_req.status_code == 200:
                 selected_quote = quote_req.json()
                 theme_source = "Programming & Tech Logic"
-        except Exception as e: 
-            print(f"--- QUOTE API ERROR: {e} ---") # Logs connection errors to your console
+        except Exception: 
+            pass
 
     return {
-        "image_url": dog_image,
+        "image_element": active_visual,
         "en": selected_quote.get("en", "Code works, but no statement returned."),
-        "author": selected_quote.get("author", "Anonymous"),
+        "author": selected_quote.get("author", "Anonymous Coder"),
         "theme": theme_source
     }
 
-# === 📤 ENDPOINT 3 (GET): Visual Renderer Layout ===
+# === 📤 ENDPOINT 3 (GET): Visual Card Viewer ===
 @app.get("/view", response_class=HTMLResponse, tags=["Interface"])
 async def view_dog_card_visual():
     data = await generate_dog_card()
@@ -92,12 +115,17 @@ async def view_dog_card_visual():
     </head>
     <body style="font-family:sans-serif; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; background:#efefef;">
         <div style="background:white; padding:30px; border-radius:15px; box-shadow:0 4px 10px rgba(0,0,0,0.1); text-align:center; max-width:400px; width:90%; margin:20px;">
-            <img src="{data['image_url']}" style="width:100%; max-height:300px; object-fit:cover; border-radius:8px; border-bottom:4px solid #3498db;">
-            <p style="font-style:italic; font-size:1.1em; color:#2c3e50; margin-top:25px; line-height:1.4;">"{data['en']}"</p>
-            <h4 style="color:#7f8c8d; margin-bottom:5px; font-weight:normal;">— {data['author']}</h4>
+            
+            <!-- 🖼️ Dynamic vector graphic block injections -->
+            <div style="width:100%; overflow:hidden; border-bottom:4px solid #3498db; margin-bottom:15px;">
+                {data['image_element']}
+            </div>
+
+            <p style="font-style:italic; font-size:1.15em; color:#2c3e50; margin-top:20px; line-height:1.4; min-height:60px;">"{data['en']}"</p>
+            <h4 style="color:#7f8c8d; margin-bottom:15px; font-weight:normal;">— {data['author']}</h4>
             <span style="display:inline-block; background:#e8f4fd; color:#3498db; font-size:0.8em; padding:6px 12px; border-radius:20px; font-weight:bold; margin-bottom:20px;">🏷️ {data['theme']}</span>
             <br>
-            <a href="/view" style="padding:12px 24px; background:#3498db; color:white; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block; transition: background 0.2s;">Next Dog 🔄</a>
+            <a href="/view" style="padding:12px 24px; background:#3498db; color:white; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">Next Dog 🔄</a>
         </div>
     </body>
     </html>
